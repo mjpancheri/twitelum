@@ -13,6 +13,8 @@ class HomePage extends Component {
             tweets: [],
             novoTweet: ''
         }
+
+        this.usuario = '@mjpancheri';
     }
 
     adicionaTweet = event => {
@@ -30,7 +32,8 @@ class HomePage extends Component {
             (tweet, idx) => {
                 return <Tweet
                     key={tweet+idx}
-                    texto={tweet} />
+                    texto={tweet} 
+                    usuario={this.usuario} />
                 }
             )
             : 'Sua lista está vazia, que tal criar um tweet?'
@@ -46,7 +49,7 @@ class HomePage extends Component {
     return (
       <Fragment>
         <Cabecalho>
-            <NavMenu usuario="@mjpancheri" />
+            <NavMenu usuario={this.usuario} />
         </Cabecalho>
         <div className="container">
             <Dashboard>

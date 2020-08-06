@@ -23,7 +23,7 @@ export default class NavMenu extends Component {
             </a>
           </li>
           <li className={navMenuStyles.navMenu__item}>
-            <a className={navMenuStyles.navMenu__link} href="/logout">
+            <a className={navMenuStyles.navMenu__link} href="/login">
               Logout
             </a>
           </li>

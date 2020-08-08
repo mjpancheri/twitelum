@@ -5,20 +5,24 @@ import Widget from '../../components/Widget'
 import './loginPage.css'
 import { NotificacaoContext } from '../../context/NotificacaoContext'
 import { LoginService } from '../../services/LoginService'
+import { FormManager } from '../../components/FormManager'
 
-const InputFormField = ({ id, label, errors, values, onChange, type = 'text' }) => {
+const InputFormField = ({ id, label, errors, touched, values, onChange, onBlur, type = 'text' }) => {
+    const isTouched = Boolean(touched[id]);
+    const hasErrors = Boolean(errors[id]);
     return (
         <div className="loginPage__inputWrap">
-            <label className="loginPage__label" htmlFor={id}>{label}</label> 
+            <label className="loginPage__label" htmlFor={id}>{label}</label>
             <input
-                className="loginPage__input" 
+                className="loginPage__input"
                 type={type}
                 id={id}
                 name={id}
                 value={values[id]}
                 onChange={onChange}
+                onBlur={onBlur}
             />
-            <p style={{ color: 'red' }}>{errors && errors[id]}</p>
+            <p style={{ color: 'red' }}>{isTouched && hasErrors && errors[id]}</p>
         </div>
     )
 };
@@ -40,37 +44,37 @@ class LoginPage extends Component {
         const { inputLogin, inputSenha } = this.state.values;
         const errors = {};
 
-        if(!inputLogin) errors.inputLogin = 'O campo login é obrigatório';
-        if(!inputSenha) errors.inputSenha = 'O campo senha é obrigatório';
+        if (!inputLogin) errors.inputLogin = 'O campo login é obrigatório';
+        if (!inputSenha) errors.inputSenha = 'O campo senha é obrigatório';
 
         this.setState({ errors });
     };
 
-    onFormFieldChange = ({ target }) => {
-        const value = target.value;
-        const name = target.name;
-        const values = { ...this.state.values, [name]: value};
-        this.setState({ values }, () => {
-            this.formValidations();
-        });
-    };
+    // onFormFieldChange = ({ target }) => {
+    //     const value = target.value;
+    //     const name = target.name;
+    //     const values = { ...this.state.values, [name]: value };
+    //     this.setState({ values }, () => {
+    //         this.formValidations();
+    //     });
+    // };
 
-    fazerLogin = (event) => {
+    fazerLogin = (event, values) => {
         event.preventDefault();
-        
+
         const dadosLogin = {
-            login: this.state.values.inputLogin,
-            senha: this.state.values.inputSenha,
+            login: values.inputLogin,
+            senha: values.inputSenha,
         }
         LoginService.logar(dadosLogin)
-        .then(() => {
-            this.context.setMsg(`Olá @${dadosLogin.login}! Bem vindo ao Twitelum, login foi um sucesso!`);
-            this.props.history.push('/');
-        })
-        .catch(err => {
-            //console.error(`[Erro ${err.status}]`, err.message);
-            this.context.setMsg(`[Erro ${err.status}] ${err.message}`);
-        })
+            .then(() => {
+                this.context.setMsg(`Olá @${dadosLogin.login}! Bem vindo ao Twitelum, login foi um sucesso!`);
+                this.props.history.push('/');
+            })
+            .catch(err => {
+                //console.error(`[Erro ${err.status}]`, err.message);
+                this.context.setMsg(`[Erro ${err.status}] ${err.message}`);
+            })
     }
 
     render() {
@@ -81,31 +85,59 @@ class LoginPage extends Component {
                     <div className="container">
                         <Widget>
                             <h2 className="loginPage__title">Seja bem vindo!</h2>
-                            <form className="loginPage__form" action="/" onSubmit={this.fazerLogin}>
-                                <InputFormField
-                                    id="inputLogin"
-                                    label="Login"
-                                    onChange={this.onFormFieldChange}
-                                    values={this.state.values}
-                                    errors={this.state.errors}
-                                />
-                                <InputFormField
-                                    id="inputSenha"
-                                    label="Senha"
-                                    type="password"
-                                    onChange={this.onFormFieldChange}
-                                    values={this.state.values}
-                                    errors={this.state.errors}
-                                />
-                                {/* <div className="loginPage__errorBox">
+                            <FormManager
+                                initialValues={{ inputLogin: '', inputSenha: '' }}
+                                onFormValidation={values => {
+                                    const errors = {};
+
+                                    if (!values.inputLogin) errors.inputLogin = 'O campo login é obrigatório';
+                                    if (!values.inputSenha) errors.inputSenha = 'O campo senha é obrigatório';
+
+                                    return errors;
+                                }}
+                            >
+                                {({
+                                    values,
+                                    errors,
+                                    touched,
+                                    onFormFieldChange,
+                                    onFormFieldBlur
+                                }) => (
+                                <form 
+                                    className="loginPage__form" 
+                                    action="/" 
+                                    onSubmit={event => this.fazerLogin(event, values)}
+                                >
+                                    <InputFormField
+                                        id="inputLogin"
+                                        label="Login"
+                                        onChange={onFormFieldChange}
+                                        onBlur={onFormFieldBlur}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                    />
+                                    <InputFormField
+                                        id="inputSenha"
+                                        label="Senha"
+                                        type="password"
+                                        onChange={onFormFieldChange}
+                                        onBlur={onFormFieldBlur}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                    />
+                                    {/* <div className="loginPage__errorBox">
                                     Mensagem de erro!
                                 </div> */}
-                                <div className="loginPage__inputWrap">
-                                    <button className="loginPage__btnLogin" type="submit">
-                                        Logar
+                                    <div className="loginPage__inputWrap">
+                                        <button className="loginPage__btnLogin" type="submit">
+                                            Logar
                                     </button>
-                                </div>
-                            </form>
+                                    </div>
+                                </form>
+                                )}
+                            </FormManager>
                         </Widget>
                     </div>
                 </div>

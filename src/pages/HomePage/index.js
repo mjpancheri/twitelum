@@ -5,6 +5,8 @@ import Dashboard from '../../components/Dashboard'
 import Widget from '../../components/Widget'
 import TrendsArea from '../../components/TrendsArea'
 import Tweet from '../../components/Tweet'
+import { API_URL } from "../../config";
+import { Helmet } from 'react-helmet';
 
 class HomePage extends Component {
     constructor() {
@@ -15,28 +17,82 @@ class HomePage extends Component {
         }
 
         this.usuario = '@mjpancheri';
+        this.token = localStorage.getItem('TOKEN');
+    }
+
+    componentDidMount(){
+        //const token = localStorage.getItem('TOKEN');
+        fetch(`${API_URL}/tweets?X-AUTH-TOKEN=${this.token}`)
+        .then(response => response.json())
+        .then((tweets) => {
+            this.setState({
+                tweets
+            })
+        })
     }
 
     adicionaTweet = event => {
+        //const token = localStorage.getItem('TOKEN');
         event.preventDefault();
         if(this.state.novoTweet.length > 0){
-            this.setState({
-                tweets: [this.state.novoTweet, ...this.state.tweets],
-                novoTweet: ''
-            });
+            fetch(`${API_URL}/tweets?X-AUTH-TOKEN=${this.token}`, {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify({ conteudo: this.state.novoTweet, login: 'omariosouto' })
+            })
+            .then((response) => {
+                return response.json();
+            })
+            .then((tweetServer) => {
+                //console.log(tweetServer);
+
+                this.setState({
+                    tweets: [tweetServer, ...this.state.tweets],
+                    novoTweet: ''
+                })
+            })
         }
     };
 
     renderTweet = () => {
         return this.state.tweets.length > 0 ? this.state.tweets.map(
-            (tweet, idx) => {
+            ({ _id, conteudo, usuario, likeado, totalLikes, removivel }, idx) => {
+                //console.log('user:', usuario);
                 return <Tweet
-                    key={tweet+idx}
-                    texto={tweet} 
-                    usuario={this.usuario} />
+                    key={_id}
+                    id={_id}
+                    texto={conteudo} 
+                    usuario={usuario}
+                    likeado={likeado}
+                    totalLikes={totalLikes} 
+                    removivel={removivel}
+                    removeHandler={(event) => this.removeTweet(_id)} />
                 }
             )
             : 'Sua lista está vazia, que tal criar um tweet?'
+    }
+
+    removeTweet = (id) => {
+        //const token = localStorage.getItem('TOKEN');
+        fetch(`${API_URL}/tweets/${id}?X-AUTH-TOKEN=${this.token}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify({ conteudo: this.state.novoTweet, login: 'omariosouto' })
+        })
+        .then((response) => {
+            return response.json();
+        })
+        .then((response) => {
+            //console.log(response);
+            const newTweets = this.state.tweets.filter( (tweet) => tweet._id !== id);
+            this.setState({
+                tweets: newTweets
+            })
+        })
     }
 
   render() {
@@ -48,6 +104,9 @@ class HomePage extends Component {
 
     return (
       <Fragment>
+        <Helmet>
+            <title>Twitelum ({`${this.state.tweets.length}`})</title>
+        </Helmet>
         <Cabecalho>
             <NavMenu usuario={this.usuario} />
         </Cabecalho>

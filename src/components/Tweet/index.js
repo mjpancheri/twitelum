@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types';
 import './tweet.css'
 import { API_URL } from "../../config";
 
@@ -32,8 +33,11 @@ class Tweet extends Component {
         }
     }
 
+    handleClickConteudo = () => 
+        this.props.onClickConteudo && this.props.onClickConteudo();
+
     render() {
-        const { usuario, texto, removivel, removeHandler } = this.props;
+        const { usuario, texto, removivel, removeHandler, opened } = this.props;
         const { likeado, totalLikes } = this.state;
         const liked = likeado ? 'iconHeart--active' : '';
 
@@ -44,10 +48,11 @@ class Tweet extends Component {
                     <span className="tweet__nomeUsuario">{ usuario.nome }</span>
                     <a href="/"><span className="tweet__userName">{ usuario.login }</span></a>
                 </div>
-                <p className="tweet__conteudo">
+                <p className="tweet__conteudo" onClick={this.handleClickConteudo}>
                     { texto }
                 </p>
                 <footer className="tweet__footer">
+                    {opened && (
                     <button className="btn btn--clean" onClick={this.likeHandler}>
                         <svg className={`icon icon--small iconHeart ${liked}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 47.5 47.5">
                             <defs>
@@ -61,13 +66,36 @@ class Tweet extends Component {
                         </svg>
                         {totalLikes}
                     </button>
+                    )}
                     {removivel && (
-                        <button onClick={removeHandler} className="btn btn--blue btn--remove">X</button>
+                        <button onClick={removeHandler} className="btn btn--blue btn--remove">x</button>
                     )}
                 </footer>
             </article>
         )
     }
 }
+
+Tweet.propTypes = {
+    removivel: PropTypes.bool,
+    opened: PropTypes.bool,
+    totalLikes: PropTypes.number.isRequired,
+    likeado: PropTypes.bool.isRequired,
+    id: PropTypes.string.isRequired,
+    usuario: PropTypes.shape({
+        foto: PropTypes.string,
+        nome: PropTypes.string,
+        login: PropTypes.string
+    }),
+    texto: PropTypes.string,
+    removeHandler: PropTypes.func,
+    onClickConteudo: PropTypes.func
+};
+
+Tweet.defaultProps = {
+    usuario: {},
+    likeado: false,
+    opened: false
+};
 
 export default Tweet

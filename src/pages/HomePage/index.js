@@ -7,13 +7,15 @@ import TrendsArea from '../../components/TrendsArea'
 import Tweet from '../../components/Tweet'
 import { API_URL } from "../../config";
 import { Helmet } from 'react-helmet';
+import { Modal } from '../../components/Modal';
 
 class HomePage extends Component {
     constructor() {
         super();
         this.state = {
             tweets: [],
-            novoTweet: ''
+            novoTweet: '',
+            tweetAtivoModal: {}
         }
 
         this.usuario = '@mjpancheri';
@@ -56,19 +58,30 @@ class HomePage extends Component {
         }
     };
 
+    abreModal = tweetParaModal => {
+        this.setState({
+            tweetAtivoModal: tweetParaModal
+        },() => {
+            console.log('twite: ', this.state.tweetAtivoModal);
+        });
+    };
+
+    fechaModal = () => this.setState({ tweetAtivoModal: {} });
+
     renderTweet = () => {
         return this.state.tweets.length > 0 ? this.state.tweets.map(
-            ({ _id, conteudo, usuario, likeado, totalLikes, removivel }, idx) => {
+            (tweet, idx) => {
                 //console.log('user:', usuario);
                 return <Tweet
-                    key={_id}
-                    id={_id}
-                    texto={conteudo} 
-                    usuario={usuario}
-                    likeado={likeado}
-                    totalLikes={totalLikes} 
-                    removivel={removivel}
-                    removeHandler={(event) => this.removeTweet(_id)} />
+                    key={tweet._id}
+                    id={tweet._id}
+                    texto={tweet.conteudo} 
+                    usuario={tweet.usuario}
+                    likeado={tweet.likeado}
+                    totalLikes={tweet.totalLikes} 
+                    removivel={tweet.removivel}
+                    removeHandler={() => this.removeTweet(tweet._id)}
+                    onClickConteudo={() => this.abreModal(tweet)} />
                 }
             )
             : 'Sua lista está vazia, que tal criar um tweet?'
@@ -78,10 +91,6 @@ class HomePage extends Component {
         //const token = localStorage.getItem('TOKEN');
         fetch(`${API_URL}/tweets/${id}?X-AUTH-TOKEN=${this.token}`, {
             method: 'DELETE',
-            headers: {
-                'Content-type': 'application/json'
-            },
-            body: JSON.stringify({ conteudo: this.state.novoTweet, login: 'omariosouto' })
         })
         .then((response) => {
             return response.json();
@@ -92,6 +101,7 @@ class HomePage extends Component {
             this.setState({
                 tweets: newTweets
             })
+            this.fechaModal();
         })
     }
 
@@ -144,6 +154,24 @@ class HomePage extends Component {
                 </Widget>
             </Dashboard>
         </div>
+        <Modal
+            isOpen={!!this.state.tweetAtivoModal._id}
+            onClose={this.fechaModal}
+        >
+            {() => (
+                <Tweet
+                    key={this.state.tweetAtivoModal._id}
+                    id={this.state.tweetAtivoModal._id}
+                    texto={this.state.tweetAtivoModal.conteudo} 
+                    opened={!!this.state.tweetAtivoModal._id}
+                    usuario={this.state.tweetAtivoModal.usuario}
+                    likeado={this.state.tweetAtivoModal.likeado}
+                    totalLikes={this.state.tweetAtivoModal.totalLikes} 
+                    removivel={this.state.tweetAtivoModal.removivel}
+                    removeHandler={() => this.removeTweet(this.state.tweetAtivoModal._id)} 
+                />
+            )}
+        </Modal>
       </Fragment>
     );
   }

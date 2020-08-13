@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types';
 import './tweet.css'
 import { API_URL } from "../../config";
+import { TweetsService } from '../../services/TweetsService';
 
 class Tweet extends Component {
     constructor(props) {
@@ -10,7 +11,6 @@ class Tweet extends Component {
             likeado: props.likeado,
             totalLikes: props.totalLikes
         }
-        this.token = localStorage.getItem('TOKEN');
     }
 
     likeHandler = () => {
@@ -23,10 +23,7 @@ class Tweet extends Component {
                 totalLikes: likeado ? totalLikes - 1 : totalLikes + 1
             })
 
-            fetch(`${API_URL}/tweets/${id}/like?X-AUTH-TOKEN=${this.token}`, {
-                method: 'POST'
-            })
-            .then( response => response.json() )
+            TweetsService.like(id)
             .then(console.log);
         }else {
             console.log('Não dê like no seu tweet...')

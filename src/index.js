@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import store from './store';
+
 // CSSs Globais
 import "./assets/css/reset.css";
 import "./assets/css/container.css";
@@ -15,13 +17,17 @@ import * as serviceWorker from './serviceWorker';
 import Roteamento from './routes';
 import { BrowserRouter } from 'react-router-dom';
 import { NotificacaoContextProvider } from './context/NotificacaoContext';
+import { Provider } from 'react-redux';
+
 
 ReactDOM.render(
-  <NotificacaoContextProvider>
-    <BrowserRouter>
-      <Roteamento />
-    </BrowserRouter>
-  </NotificacaoContextProvider>, 
+  <Provider store={store}>
+    <NotificacaoContextProvider>
+      <BrowserRouter>
+        <Roteamento />
+      </BrowserRouter>
+    </NotificacaoContextProvider>
+  </Provider>, 
   document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change

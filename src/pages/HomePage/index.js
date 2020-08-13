@@ -5,12 +5,11 @@ import Dashboard from '../../components/Dashboard'
 import Widget from '../../components/Widget'
 import TrendsArea from '../../components/TrendsArea'
 import Tweet from '../../components/Tweet'
-import { API_URL } from "../../config";
 import { Helmet } from 'react-helmet';
 import { Modal } from '../../components/Modal';
-import { CARREGA_TWEETS } from '../../store';
 import { ReactReduxContext } from 'react-redux';
 import { TweetsService } from '../../services/TweetsService';
+import { TweetsThunkActions } from '../../store/ducks/tweets';
 
 class HomePage extends Component {
   static contextType = ReactReduxContext;
@@ -32,14 +31,11 @@ class HomePage extends Component {
 
     store.subscribe(() => {
       this.setState({
-        tweets: store.getState()
+        tweets: store.getState().tweets.data
       })
     })
 
-    TweetsService.carrega()
-    .then((tweets) => {
-      store.dispatch({ type: CARREGA_TWEETS, tweets })
-    })
+    store.dispatch(TweetsThunkActions.carregaTweets());
   }
 
   adicionaTweet = event => {

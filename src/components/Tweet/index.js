@@ -1,43 +1,18 @@
 import React, { Component } from 'react'
+import { Delete } from '@material-ui/icons';
+
 import PropTypes from 'prop-types';
 import './tweet.css'
-import { API_URL } from "../../config";
-import { TweetsService } from '../../services/TweetsService';
 
 class Tweet extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            likeado: props.likeado,
-            totalLikes: props.totalLikes
-        }
-    }
-
-    likeHandler = () => {
-        const { likeado, totalLikes } = this.state
-        const { id, removivel } = this.props
-
-        if(!removivel) {
-            this.setState({
-                likeado: !likeado,
-                totalLikes: likeado ? totalLikes - 1 : totalLikes + 1
-            })
-
-            TweetsService.like(id)
-            .then(console.log);
-        }else {
-            console.log('Não dê like no seu tweet...')
-        }
-    }
 
     handleClickConteudo = () => 
         this.props.onClickConteudo && this.props.onClickConteudo();
 
     render() {
-        const { usuario, texto, removivel, removeHandler, opened } = this.props;
-        const { likeado, totalLikes } = this.state;
+        const { usuario, texto, id, opened, removivel, likeado, totalLikes } = this.props;
         const liked = likeado ? 'iconHeart--active' : '';
-
+        // console.log(this.props);
         return (
             <article className="tweet">
                 <div className="tweet__cabecalho">
@@ -49,8 +24,7 @@ class Tweet extends Component {
                     { texto }
                 </p>
                 <footer className="tweet__footer">
-                    {opened && (
-                    <button className="btn btn--clean" onClick={this.likeHandler}>
+                    <button className="btn btn--clean" onClick={() => opened && this.props.likeHandler(id)}>
                         <svg className={`icon icon--small iconHeart ${liked}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 47.5 47.5">
                             <defs>
                                 <clipPath id="a">
@@ -63,9 +37,8 @@ class Tweet extends Component {
                         </svg>
                         {totalLikes}
                     </button>
-                    )}
                     {removivel && (
-                        <button onClick={removeHandler} className="btn btn--blue btn--remove">x</button>
+                        <Delete className="iconTrash" onClick={() => this.props.removeHandler(id)} />
                     )}
                 </footer>
             </article>
@@ -86,6 +59,7 @@ Tweet.propTypes = {
     }),
     texto: PropTypes.string,
     removeHandler: PropTypes.func,
+    likeHandler: PropTypes.func,
     onClickConteudo: PropTypes.func
 };
 

@@ -1,0 +1,11 @@
+/* iconTrash */
+.iconTrash {
+  position: absolute;
+  top: -4px;
+  right: 15px;
+  color: #cccccc;
+}
+.iconTrash:hover,
+.iconTrash:focus {
+  color: #cc0000;
+}
